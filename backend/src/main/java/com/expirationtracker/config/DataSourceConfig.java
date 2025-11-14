@@ -28,13 +28,14 @@ public class DataSourceConfig {
             throw new IllegalStateException("DATABASE_URL 환경 변수가 설정되지 않았습니다.");
         }
 
-        // Render의 DATABASE_URL 형식: postgresql://user:password@host:port/database
+        // Render의 DATABASE_URL 형식: postgresql://user:password@host/database (포트 생략)
+        // 또는: postgresql://user:password@host:port/database
         URI dbUri = new URI(databaseUrl);
 
         String username = dbUri.getUserInfo().split(":")[0];
         String password = dbUri.getUserInfo().split(":")[1];
         String host = dbUri.getHost();
-        int port = dbUri.getPort();
+        int port = dbUri.getPort() > 0 ? dbUri.getPort() : 5432; // 포트 없으면 기본값 5432
         String database = dbUri.getPath().substring(1); // Remove leading '/'
 
         // JDBC URL 구성
