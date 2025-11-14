@@ -17,23 +17,63 @@ class GiftCardProvider with ChangeNotifier {
   String? _selectedStatus;
   String? _selectedCategory;
 
+  // 검색 및 정렬 상태
+  String _searchQuery = '';
+  SortOption _sortOption = SortOption.dateDesc;
+
   List<GiftCard> get cards => _cards;
   Map<String, dynamic>? get stats => _stats;
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get selectedStatus => _selectedStatus;
   String? get selectedCategory => _selectedCategory;
+  String get searchQuery => _searchQuery;
+  SortOption get sortOption => _sortOption;
 
-  // 필터링된 카드 목록
+  // 필터링, 검색, 정렬된 카드 목록
   List<GiftCard> get filteredCards {
     var filtered = _cards;
 
+    // 상태 필터
     if (_selectedStatus != null) {
       filtered = filtered.where((card) => card.status == _selectedStatus).toList();
     }
 
+    // 카테고리 필터
     if (_selectedCategory != null) {
       filtered = filtered.where((card) => card.category == _selectedCategory).toList();
+    }
+
+    // 검색
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((card) {
+        final query = _searchQuery.toLowerCase();
+        return card.name.toLowerCase().contains(query) ||
+               (card.memo?.toLowerCase().contains(query) ?? false) ||
+               (card.barcode?.contains(_searchQuery) ?? false);
+      }).toList();
+    }
+
+    // 정렬
+    switch (_sortOption) {
+      case SortOption.nameAsc:
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case SortOption.nameDesc:
+        filtered.sort((a, b) => b.name.compareTo(a.name));
+        break;
+      case SortOption.dateAsc:
+        filtered.sort((a, b) => a.expirationDate.compareTo(b.expirationDate));
+        break;
+      case SortOption.dateDesc:
+        filtered.sort((a, b) => b.expirationDate.compareTo(a.expirationDate));
+        break;
+      case SortOption.category:
+        filtered.sort((a, b) => a.category.compareTo(b.category));
+        break;
+      case SortOption.status:
+        filtered.sort((a, b) => a.status.compareTo(b.status));
+        break;
     }
 
     return filtered;
@@ -184,10 +224,23 @@ class GiftCardProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // 검색어 설정
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  // 정렬 옵션 설정
+  void setSortOption(SortOption option) {
+    _sortOption = option;
+    notifyListeners();
+  }
+
   // 필터 초기화
   void clearFilters() {
     _selectedStatus = null;
     _selectedCategory = null;
+    _searchQuery = '';
     notifyListeners();
   }
 
@@ -195,5 +248,34 @@ class GiftCardProvider with ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+}
+
+// 정렬 옵션 열거형
+enum SortOption {
+  nameAsc,     // 이름 오름차순
+  nameDesc,    // 이름 내림차순
+  dateAsc,     // 유효기간 오름차순 (임박순)
+  dateDesc,    // 유효기간 내림차순
+  category,    // 카테고리순
+  status,      // 상태순
+}
+
+extension SortOptionExtension on SortOption {
+  String get displayName {
+    switch (this) {
+      case SortOption.nameAsc:
+        return '이름순 (가나다)';
+      case SortOption.nameDesc:
+        return '이름순 (다나가)';
+      case SortOption.dateAsc:
+        return '유효기간 임박순';
+      case SortOption.dateDesc:
+        return '유효기간 최신순';
+      case SortOption.category:
+        return '카테고리순';
+      case SortOption.status:
+        return '상태순';
+    }
   }
 }

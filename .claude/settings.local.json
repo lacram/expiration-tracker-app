@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(./gradlew bootRun:*)",
+      "Bash(curl:*)",
+      "Bash(Get-Process -Name java -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Id, StartTime)",
+      "Bash(Format-Table)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(flutter run:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
