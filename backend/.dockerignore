@@ -1,0 +1,30 @@
+# Build artifacts
+build/
+.gradle/
+*.jar
+*.war
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+data/
+*.db
+
+# Logs
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Gradle wrapper (already in image)
+.gradle/
