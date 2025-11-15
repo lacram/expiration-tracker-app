@@ -94,15 +94,34 @@ public class OcrService {
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(response);
 
-            // images[0].title.inferText에서 실제 인식된 텍스트 추출
-            String inferText = "";
+            // General OCR: images[0].fields[].inferText에서 텍스트 추출
+            StringBuilder inferTextBuilder = new StringBuilder();
             if (root.has("images") && root.get("images").isArray() && root.get("images").size() > 0) {
                 com.fasterxml.jackson.databind.JsonNode firstImage = root.get("images").get(0);
-                if (firstImage.has("title") && firstImage.get("title").has("inferText")) {
-                    inferText = firstImage.get("title").get("inferText").asText();
-                    log.info("OCR 인식 텍스트: {}", inferText);
+
+                // General OCR의 경우 fields 배열에서 텍스트 추출
+                if (firstImage.has("fields") && firstImage.get("fields").isArray()) {
+                    for (com.fasterxml.jackson.databind.JsonNode field : firstImage.get("fields")) {
+                        if (field.has("inferText")) {
+                            String text = field.get("inferText").asText();
+                            inferTextBuilder.append(text);
+                            // lineBreak가 true이면 줄바꿈 추가
+                            if (field.has("lineBreak") && field.get("lineBreak").asBoolean()) {
+                                inferTextBuilder.append("\n");
+                            } else {
+                                inferTextBuilder.append(" ");
+                            }
+                        }
+                    }
+                }
+                // Template OCR의 경우 (하위 호환성)
+                else if (firstImage.has("title") && firstImage.get("title").has("inferText")) {
+                    inferTextBuilder.append(firstImage.get("title").get("inferText").asText());
                 }
             }
+
+            String inferText = inferTextBuilder.toString().trim();
+            log.info("OCR 인식 텍스트: {}", inferText);
 
             // 추출된 텍스트가 없으면 실패
             if (inferText.isEmpty()) {
