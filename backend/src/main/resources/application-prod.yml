@@ -16,16 +16,16 @@ spring:
 server:
   port: ${PORT:8080}
 
-# Naver Clova OCR
+# Naver Clova OCR (선택 사항)
 naver:
   clova:
     ocr:
-      url: ${NAVER_CLOVA_OCR_URL}
-      secret: ${NAVER_CLOVA_OCR_SECRET}
+      url: ${NAVER_CLOVA_OCR_URL:}
+      secret: ${NAVER_CLOVA_OCR_SECRET:}
 
-# FCM
+# FCM (선택 사항)
 fcm:
-  service-account-file: ${FCM_SERVICE_ACCOUNT_FILE}
+  service-account-file: ${FCM_SERVICE_ACCOUNT_FILE:}
 
 logging:
   level:
